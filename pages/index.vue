@@ -15,9 +15,6 @@
         <v-card-text>
           <div>{{ url_login }}</div>
         </v-card-text>
-        <v-card-text>
-          <div>{{ apiLoginResponse }}</div>
-        </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn color="primary" @click="login">Login</v-btn>
@@ -39,6 +36,20 @@
           <v-btn color="primary" @click="callApiWithJwtBearer">Call API</v-btn>
         </v-card-actions>
       </v-card>
+
+
+      <v-card>
+        <v-card-title class="headline">
+          Token
+        </v-card-title>
+        <v-card-text>
+          <div>{{ localStoragetoken }}</div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="resettoken">Reset Token</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-col>
   </v-row>
 </template>
@@ -46,42 +57,34 @@
 
 <script>
 import axios from 'axios';
-import { mapActions } from 'vuex';
-import { mapState } from 'vuex';
-import api from '../providers/apiprovider';
+import api_server2 from '../providers/apiprovider';
 
 export default {
   name: "IndexPage",
   data() {
     return {
       url_login: "http://localhost:8014/api/Authentication/Login",
-      url_randomnumber: "http://localhost:8011/api/Home/randomnumber",
+      url_randomnumber: "/Home/randomnumber",
       username: "",
       password: "",
-      apiLoginResponse: "",
-      apiResponse: ""
+      apiResponse: "",
+      localStoragetoken: "",
     };
   },
   mounted() {
-    // this.login().then(() => {
-    //   this.callApiWithJwtBearer();
-    // });
+    this.localStoragetoken = localStorage.token;
   },
   computed: {
-    ...mapState(['token']), // Include the token in the computed properties
-    // Rest of your computed properties
+  },
+  watch: {
+    localStoragetoken(newValue) {
+      localStorage.token = newValue; // Update localStorage when localStoragetoken changes
+    },
   },
   methods: {
-    ...mapActions(['saveToken']), // Include the saveToken action
     async callApiWithJwtBearer() {
       try {
-        const token = this.token; // Get the token from the store
-
-        const response = await axios.get(this.url_randomnumber, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await api_server2.get(this.url_randomnumber);
         this.apiResponse = response.data;
       } catch (error) {
         console.error(error); // Handle any error that occurred during the API call
@@ -96,12 +99,15 @@ export default {
         };
         const response = await axios.post(this.url_login, data);
         const token = response.data.token;
-        this.saveToken(token); // Save token to the store
-        this.apiLoginResponse = token;
+        this.localStoragetoken = token;
+        localStorage.token = token;
       } catch (error) {
         console.error(error); // Handle any error that occurred during the API call
         this.apiLoginResponse = error.response ? error.response.statusText : error.message;
       }
+    },
+    resettoken() {
+      this.localStoragetoken = null; // Update localStoragetoken
     }
   },
 };
