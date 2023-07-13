@@ -15,6 +15,9 @@
         <v-card-text>
           <div>{{ url_login }}</div>
         </v-card-text>
+        <v-card-text>
+          <div>{{ apiLoginResponse }}</div>
+        </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn color="primary" @click="login">Login</v-btn>
@@ -63,11 +66,12 @@ export default {
   name: "IndexPage",
   data() {
     return {
-      url_login: "http://localhost:8014/api/Authentication/Login",
+      url_login: "http://212.80.212.18/identityserver/api/Authentication/Login",
       url_randomnumber: "/Home/randomnumber",
       username: "",
       password: "",
       apiResponse: "",
+      apiLoginResponse: "",
       localStoragetoken: "",
     };
   },
@@ -101,6 +105,7 @@ export default {
         const token = response.data.token;
         this.localStoragetoken = token;
         localStorage.token = token;
+        this.apiLoginResponse = response.data;
       } catch (error) {
         console.error(error); // Handle any error that occurred during the API call
         this.apiLoginResponse = error.response ? error.response.statusText : error.message;
