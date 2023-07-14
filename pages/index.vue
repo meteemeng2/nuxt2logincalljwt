@@ -24,7 +24,7 @@
         </v-card-actions>
       </v-card>
 
-      <v-card>
+      <v-card v-show="false">
         <v-card-title class="headline">
           API Response
         </v-card-title>
@@ -41,7 +41,7 @@
       </v-card>
 
 
-      <v-card>
+      <v-card v-show="false">
         <v-card-title class="headline">
           Token
         </v-card-title>
@@ -68,6 +68,7 @@ export default {
     return {
       url_login: "http://212.80.212.18/identityserver/api/Authentication/Login",
       url_randomnumber: "/Home/randomnumber",
+      reactweb : "http://212.80.212.18/portie-client/",
       username: "",
       password: "",
       apiResponse: "",
@@ -105,6 +106,11 @@ export default {
         const token = response.data.token;
         this.localStoragetoken = token;
         localStorage.token = token;
+            
+        // Redirect to React application with the JWT token
+        var redirect_url = `${this.reactweb}?jwt=${token}`;
+        window.location.href = redirect_url;
+
         this.apiLoginResponse = response.data;
       } catch (error) {
         console.error(error); // Handle any error that occurred during the API call

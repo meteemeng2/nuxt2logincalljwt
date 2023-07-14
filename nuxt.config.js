@@ -69,6 +69,6 @@ export default {
   },
   
   router: {
-    base: '/loginnuxtjs/'
+    base: '/portal/'
   }
 }
