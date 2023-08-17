@@ -1,125 +1,79 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="12" sm="8" md="6">
-      <v-card>
-        <v-card-title class="headline">
-          Login
-        </v-card-title>
-        <v-card-text>
-          <v-text-field v-model="username" label="Username"></v-text-field>
-          <v-text-field v-model="password" label="Password" type="password"></v-text-field>
-        </v-card-text>
-        <v-card-title class="headline">
-          API Login Response
-        </v-card-title>
-        <v-card-text>
-          <div>{{ url_login }}</div>
-        </v-card-text>
-        <v-card-text>
-          <div>{{ apiLoginResponse }}</div>
-        </v-card-text>
+  <div class="login-container">
+    <v-row justify="center" align="center">
+      <v-col cols="12" sm="8" md="6" v-if="!token">
+        <v-card>
+          <v-card-title class="headline">
+            Login
+          </v-card-title>
+          <v-card-text>
+            <v-text-field v-model="username" label="Username"></v-text-field>
+            <v-text-field v-model="password" label="Password" type="password"></v-text-field>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" @click="login">Login</v-btn>
+            <v-spacer />
+          </v-card-actions>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="8" md="6" v-if="token">
         <v-card-actions>
+          <!-- Add buttons for different sites -->
+          <v-btn color="primary" @click="redirectToSite('react')">Redirect to React Site</v-btn>
           <v-spacer />
-          <v-btn color="primary" @click="login">Login</v-btn>
+          <v-btn color="primary" @click="redirectToSite('angular')">Redirect to Angular Site</v-btn>
+          <!-- Add more buttons for other sites if needed -->
         </v-card-actions>
-      </v-card>
-
-      <v-card v-show="false">
-        <v-card-title class="headline">
-          API Response
-        </v-card-title>
-        <v-card-text>
-          <div>{{ url_randomnumber }}</div>
-        </v-card-text>
-        <v-card-text>
-          <div>{{ apiResponse }}</div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" @click="callApiWithJwtBearer">Call API</v-btn>
-        </v-card-actions>
-      </v-card>
-
-
-      <v-card v-show="false">
-        <v-card-title class="headline">
-          Token
-        </v-card-title>
-        <v-card-text>
-          <div>{{ localStoragetoken }}</div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn color="primary" @click="resettoken">Reset Token</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-col>
-  </v-row>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
+<style>
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Ensures the container takes at least the full viewport height */
+}
+</style>
 
 <script>
 import axios from 'axios';
-import api_server2 from '../providers/apiprovider';
 
 export default {
   name: "IndexPage",
   data() {
     return {
-      url_login: "http://212.80.212.18/identityserver/api/Authentication/Login",
-      url_randomnumber: "/Home/randomnumber",
-      reactweb : "http://212.80.212.18/portie-client/",
       username: "",
       password: "",
-      apiResponse: "",
-      apiLoginResponse: "",
-      localStoragetoken: "",
+      token: "",
     };
   },
-  mounted() {
-    this.localStoragetoken = localStorage.token;
-  },
-  computed: {
-  },
-  watch: {
-    localStoragetoken(newValue) {
-      localStorage.token = newValue; // Update localStorage when localStoragetoken changes
-    },
-  },
   methods: {
-    async callApiWithJwtBearer() {
-      try {
-        const response = await api_server2.get(this.url_randomnumber);
-        this.apiResponse = response.data;
-      } catch (error) {
-        console.error(error); // Handle any error that occurred during the API call
-        this.apiResponse = error.response ? error.response.statusText : error.message;
-      }
-    },
     async login() {
       try {
         const data = {
           username: this.username,
           password: this.password,
         };
-        const response = await axios.post(this.url_login, data);
-        const token = response.data.token;
-        this.localStoragetoken = token;
-        localStorage.token = token;
-            
-        // Redirect to React application with the JWT token
-        var redirect_url = `${this.reactweb}?jwt=${token}`;
-        window.location.href = redirect_url;
-
-        this.apiLoginResponse = response.data;
+        const response = await axios.post(this.$config.IdentityURL, data);
+        this.token = response.data.token; // Use "this.token" to set the token
       } catch (error) {
-        console.error(error); // Handle any error that occurred during the API call
-        this.apiLoginResponse = error.response ? error.response.statusText : error.message;
+        console.error(error);
       }
     },
-    resettoken() {
-      this.localStoragetoken = null; // Update localStoragetoken
-    }
+    redirectToSite(site) {
+      if (this.token) { // Use "this.token" to check if the token exists
+        let redirect_url = '';
+        if (site === 'react') {
+          redirect_url = `${this.$config.ReactClientURL}?jwt=${this.token}`; // Use "this.token"
+        } else if (site === 'angular') {
+          redirect_url = `${this.$config.AngularClientURL}?jwt=${this.token}`; // Use "this.token"
+        }
+        window.location.href = redirect_url;
+      }
+    },
   },
 };
 </script>

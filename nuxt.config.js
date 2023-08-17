@@ -1,13 +1,45 @@
 import colors from 'vuetify/es5/util/colors'
 
+// Check if the environment variable USE_LOCALHOST is set to true
+const useLocalhost = true;
+const baseURL = 'http://212.80.212.18'
+
+function get_Identity_URL() {
+  return useLocalhost ?
+    'http://localhost:8014/api/Authentication/Login'
+    :
+    `${baseURL}/identityserver/api/Authentication/Login`;
+}
+function get_ReactClient_URL() {
+  return useLocalhost ?
+    'http://localhost:7777/portie-client/'
+    :
+    `${baseURL}/portie-client`;
+}
+function get_AngularClient_URL() {
+  return useLocalhost ?
+    'http://localhost:7777/portie-client/'
+    :
+    `${baseURL}/portie-client`;
+}
+
 export default {
+  publicRuntimeConfig: {
+    IdentityURL: get_Identity_URL(),
+    ReactClientURL: get_ReactClient_URL(),
+    AngularClientURL: get_AngularClient_URL(),
+  },
+
+  privateRuntimeConfig: {
+    apiSecret: 'test'
+  },
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - nuxt2api_connect',
-    title: 'nuxt2api_connect',
+    titleTemplate: '%s - NAJA',
+    title: 'MENG PORTAL',
     htmlAttrs: {
       lang: 'en'
     },
@@ -67,7 +99,7 @@ export default {
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
   },
-  
+
   router: {
     base: '/portal/'
   }
